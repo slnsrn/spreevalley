@@ -13,7 +13,12 @@ const disableDarMode = () =>{
   document.getElementsByTagName('html')[0].classList.remove('dark')
 }
 
-export default function Home() {
+const bgStyle={
+  mobile:{ backgroundPosition: 'center bottom', backgroundSize: 'cover'},
+  desktop:{ backgroundPosition: 'left bottom', backgroundSize: '100% auto'}
+}
+
+export default function Home({isMobile}) {
   const [darkMode, setDarkMode] = useState(false)
 
   useEffect(()=> {
@@ -24,7 +29,10 @@ export default function Home() {
    const background = darkMode ? 'bg-dark.png' : 'bg-light.png'
 
   return (
-    <div className="w-full min-h-screen h-auto dark:bg-black bg-light-bg relative" style={{ backgroundImage: `url("${background}")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'left bottom' }}>
+    <div>
+      <div
+    className="w-full min-h-screen h-auto dark:bg-black bg-light-bg relative"
+    style={{ backgroundImage: `url("${background}")`, backgroundRepeat: 'no-repeat', ...bgStyle[isMobile?'mobile':'desktop']}}>
       <Head>
         <title>Spree Valley</title>
         <link rel="icon" href="/favicon.ico" />
@@ -37,13 +45,27 @@ export default function Home() {
             <img src={darkMode ? 'light-switch.svg' : 'dark-switch.svg'} onClick={()=>setDarkMode(!darkMode)}/>
           </div>
         </Header>
-      <main className="mx-auto max-w-4xl items-center text-left">
+      <main className="mx-auto max-w-4xl items-center text-left p-4">
         <HeroSection/>
         <Projects/>
         <Contact/>
       </main>
 
-      <Footer darkMode={darkMode}/>
+      {!isMobile &&<Footer darkMode={darkMode}/>}
+    </div>
+      {isMobile&&<Footer darkMode={darkMode}/>}
+
     </div>
   )
+}
+
+export async function getServerSideProps (context) {
+  const UA = context.req.headers['user-agent'];
+  const isMobile = Boolean(UA.match(
+    /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i
+  ))
+
+  return {
+    props: { isMobile }
+  }
 }
